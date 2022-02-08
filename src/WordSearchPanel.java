@@ -50,7 +50,7 @@ public class WordSearchPanel extends JPanel{
                 //Draw Cells
                 g.setColor(Color.white);
                 if(cellMouseOverX ==x & cellMouseOverY == y){
-                    g.setColor(new Color(0x011874CD, true));
+                    g.setColor(new Color(0x88ff0000, true));
                 }
 
                 if(isCurrentlySelected[y][x]){
