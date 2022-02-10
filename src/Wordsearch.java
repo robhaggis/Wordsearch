@@ -1,9 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.Random;
 
 import static javax.swing.BorderFactory.createLineBorder;
@@ -78,6 +76,12 @@ public class Wordsearch {
 
         //Generate Button
         JButton generateButton = new JButton("Generate Puzzle");
+        generateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generateButtonPressed();
+            }
+        });
         c.gridx = 0;
         c.gridy = 2;
         c.gridwidth = 1;
@@ -88,6 +92,12 @@ public class Wordsearch {
 
         //Reset Button
         JButton resetButton = new JButton("Reset Puzzle");
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetButtonPressed();
+            }
+        });
         c.gridx = 1;
         c.gridy = 2;
         c.gridwidth = 1;
@@ -97,5 +107,15 @@ public class Wordsearch {
         frame.add(resetButton, c);
 
         frame.repaint();
+    }
+
+    public static void generateButtonPressed(){
+        wordSearchPanel.loadNewPuzzle();
+
+    }
+
+    public static void resetButtonPressed(){
+        wordSearchPanel.resetGrid();
+
     }
 }

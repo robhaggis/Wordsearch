@@ -1,12 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Random;
 
 public class WordSearchPanel extends JPanel{
 
-    final int GRIDX = 15;
-    final int GRIDY = 15;
+    final int GRIDX = 25;
+    final int GRIDY = 25;
     int panelWidth = -1;
     int panelHeight = -1;
 
@@ -18,7 +20,6 @@ public class WordSearchPanel extends JPanel{
     WordPane wordPane;
 
     String[][] letterGrid = new String[GRIDY][GRIDX];
-    ArrayList<String> masterWordList;
     ArrayList<String> failedToAddWords = new ArrayList<String>();
 
     boolean[][] isCurrentlySelected = new boolean[GRIDY][GRIDX];
@@ -30,16 +31,13 @@ public class WordSearchPanel extends JPanel{
 
     public WordSearchPanel(WordPane panelWords){
         this.wordPane = panelWords;
-        masterWordList = panelWords.getWords();
-        initGrid();
+        resetGrid();
     }
 
     private void initGrid(){
-        resetGrid();
-        addWordListToGrid(masterWordList);
+        addWordListToGrid(wordPane.getWords());
         int attempts = 0;
         while(failedToAddWords.size() > 0 && attempts<1000){
-            //TODO Weird crash here when trying to add too many words IOOB error
             ArrayList<String> wordsToReAdd = new ArrayList<String>();
             for(String w : failedToAddWords){
                 wordsToReAdd.add(w);
@@ -47,14 +45,19 @@ public class WordSearchPanel extends JPanel{
             addWordListToGrid(wordsToReAdd);
             attempts++;
         }
-        fillEmptyGridSpacesWithRandomLetters();
+        System.out.println("Failed to Add:");
+        System.out.println(failedToAddWords);
+        //TODO Remove failed to add words from displayed list
+        //fillEmptyGridSpacesWithRandomLetters();
     }
 
     public void paintComponent(Graphics g){
-
+            //TODO Center letters in cells
         super.paintComponent(g);
-        panelWidth = super.getWidth();
-        panelHeight = super.getHeight();
+        if(panelWidth==-1 || panelHeight==-1){
+            panelWidth = super.getWidth();
+            panelHeight = super.getHeight();
+        }
         int cellWidth = panelWidth / GRIDX;
         int cellHeight = panelHeight / GRIDY;
 
@@ -106,7 +109,7 @@ public class WordSearchPanel extends JPanel{
             guessEndX = cellClickedX;
             guessEndY = cellClickedY;
             if(checkForValidMove()){
-                checkForWordMatch();
+                String wordPicked = new String();
             }
             else
             {
@@ -135,14 +138,15 @@ public class WordSearchPanel extends JPanel{
 
     public void resetGrid(){
         repaint();
-        for(int y=0;y<GRIDY;y++){
-            for(int x=0;x<GRIDX;x++){
+        for(int y=0;y<GRIDY;y++) {
+            for (int x = 0; x < GRIDX; x++) {
                 letterGrid[y][x] = "";
                 isCurrentlySelected[y][x] = false;
             }
         }
         startSelected = false;
         endSelected = false;
+        initGrid();
     }
     private void checkForWordMatch(){
         System.out.println("No Match");
@@ -174,22 +178,24 @@ public class WordSearchPanel extends JPanel{
 
     private boolean addWordToGrid(String word) {
 
+//        /System.out.println("addWordToGrid(" + word + ")");
         //TODO encourage more crossover words by biasing the wordX and wordY to
         //favour letters already on the grid
         int len = word.length();
         if (!(len > GRIDX) || !(len > GRIDY))
         {
-            int dir = rng.nextInt(4);
+            int dir = rng.nextInt(8);
             String[][] copyOfGrid = copyGrid();
 
-            //TODO Diagonal Letter support
+            //TODO Abstract repeated code in switch statements to its own function
             int wordX = 0;
             int wordY = 0;
             int lettersAdded = 0;
             switch(dir) {
-                case 0:
+                case 0: //LEFT TO RIGHT
                     wordX = rng.nextInt(0, GRIDX - len);
-                    wordY = rng.nextInt(0, GRIDY);
+                    wordY = rng.nextInt(0, GRIDY-1);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
                     lettersAdded = 0;
                     for (int i = 0; i < len; i++) {
                         String letterToAdd = word.substring(i, i + 1);
@@ -198,9 +204,10 @@ public class WordSearchPanel extends JPanel{
                         }
                     }
                     break;
-                case 1:
-                    wordX = rng.nextInt(0, GRIDX);
+                case 1://TOP TO BOTTOM
+                    wordX = rng.nextInt(0, GRIDX-1);
                     wordY = rng.nextInt(0, GRIDY-len);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
                     lettersAdded = 0;
                     for (int i = 0; i < len; i++) {
                         String letterToAdd = word.substring(i, i + 1);
@@ -210,9 +217,10 @@ public class WordSearchPanel extends JPanel{
                     }
                     break;
 
-                case 2:
-                    wordX = rng.nextInt(GRIDX-len, GRIDX);
-                    wordY = rng.nextInt(0, GRIDY);
+                case 2://RIGHT TO LEFT
+                    wordX = rng.nextInt(GRIDX-(GRIDX-len), GRIDX-1);
+                    wordY = rng.nextInt(0, GRIDY-1);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
                     lettersAdded = 0;
                     for (int i = 0; i <len;  i++) {
                         String letterToAdd = word.substring(i, i + 1);
@@ -222,9 +230,10 @@ public class WordSearchPanel extends JPanel{
                     }
                     break;
 
-                case 3:
-                    wordX = rng.nextInt(0, GRIDX);
-                    wordY = rng.nextInt(GRIDY-len, GRIDY);
+                case 3://BOTTOM TO TOP
+                    wordX = rng.nextInt(0, GRIDX-1);
+                    wordY = rng.nextInt(GRIDY-(GRIDY-len), GRIDY);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
                     lettersAdded = 0;
                     for (int i = 0; i <len;  i++) {
                         String letterToAdd = word.substring(i, i + 1);
@@ -233,11 +242,63 @@ public class WordSearchPanel extends JPanel{
                         }
                     }
                     break;
-                }
 
+                case 4://DOWN AND RIGHT
+                    wordX = rng.nextInt(0, GRIDX-len);
+                    wordY = rng.nextInt(0, GRIDY-len);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX+i, wordY+i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+
+                case 5://DOWN AND LEFT
+                    wordX = rng.nextInt(GRIDX-(GRIDX-len), GRIDX);
+                    wordY = rng.nextInt(0, GRIDY-len);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX-i, wordY+i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+
+                case 6://UP AND RIGHT
+                    wordX = rng.nextInt(0, GRIDX-len);
+                    wordY = rng.nextInt(GRIDY-(GRIDY-len), GRIDY);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX+i, wordY-i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+
+                case 7://UP AND LEFT
+                    wordX = rng.nextInt(GRIDX-(GRIDX-len), GRIDX);
+                    wordY = rng.nextInt(GRIDY-(GRIDY-len), GRIDY);
+                    //System.out.println("Len: " + len + ", X: " + wordX + ", Y: " + wordY + ", dir: " + dir);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX-i, wordY-i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+                }
 
             if (lettersAdded == len) {
                 letterGrid = copyOfGrid;
+                //System.out.println(word + " added successfully");
                 return true;
             }
         }
@@ -254,6 +315,7 @@ public class WordSearchPanel extends JPanel{
     }
 
     private void fillEmptyGridSpacesWithRandomLetters() {
+        //TODO only use letters present in word list
 
         for (int y = 0; y < GRIDY; y++) {
             for (int x = 0; x < GRIDX; x++) {
@@ -265,6 +327,13 @@ public class WordSearchPanel extends JPanel{
 
             }
         }
+    }
+
+    public void loadNewPuzzle(){
+        wordPane.loadNewPuzzle();
+        resetGrid();
+        System.out.println("Reset Called");
+
     }
 
     private String[][] copyGrid(){
