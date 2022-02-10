@@ -6,8 +6,8 @@ import java.util.Random;
 public class WordSearchPanel extends JPanel{
 
     //TODO Set Grid size based on longest word in list
-    final int GRIDX = 20;
-    final int GRIDY = 20;
+    final int GRIDX = 7;
+    final int GRIDY = 7;
     int panelWidth = -1;
     int panelHeight = -1;
 
@@ -46,7 +46,6 @@ public class WordSearchPanel extends JPanel{
             attempts++;
         }
         if(failedToAddWords.size() >0){
-            //TODO Remove failed to add words from words to find
             System.out.println("Failed to Add:");
             System.out.println(failedToAddWords);
             wordPane.removeUnaddedWords(failedToAddWords);
@@ -124,7 +123,6 @@ public class WordSearchPanel extends JPanel{
             String wordPicked = getStringFromGrid(sX, sY, eX, eY);
             if (wordPicked != "") {
                 if (wordPane.isAWord(wordPicked)){
-                    //TODO MATCH
                     highlightWord(sX, sY, eX, eY);
                 } else {
                     //NO MATCH or Invalid Move
@@ -163,6 +161,11 @@ public class WordSearchPanel extends JPanel{
                 isFoundCell[y][x1] = true;
             }
         }
+
+        //TODO Diagonal Highlighting
+
+
+        //Diagonal
     }
 
     //TODO Ewww so many ifs
@@ -288,10 +291,9 @@ public class WordSearchPanel extends JPanel{
         int len = word.length();
         if (!(len > GRIDX) || !(len > GRIDY))
         {
-            int dir = rng.nextInt(4);
+            int dir = rng.nextInt(8);
             String[][] copyOfGrid = copyGrid();
 
-            //TODO Abstract repeated code in switch statements to its own function
             int wordX = 0;
             int wordY = 0;
             int lettersAdded = 0;

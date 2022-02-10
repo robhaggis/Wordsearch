@@ -8,8 +8,9 @@ public class WordPane extends JPanel {
     ArrayList<String> words = new ArrayList<String>();
     String[] puzzles = {"fruit", "ukcities", "icecream", "cocktails", "fourletters", "fiveletters", "elevenletters"};
     String title = new String();
+    boolean[] wordsToStrikeThrough;
+
     public WordPane(){
-        //TODO Multiple Text Files
         loadNewPuzzle();
     }
 
@@ -19,13 +20,31 @@ public class WordPane extends JPanel {
         String randomFile = puzzles[r.nextInt(puzzles.length)];
         //String file = "src/wordlists/"+randomFile+".txt";
         String file = "src/wordlists/fourletters.txt";
-        loadFileToWordList(file, 2);
+        loadFileToWordList(file, 4);
+        Collections.sort((words));
+        wordsToStrikeThrough = new boolean[words.size()];
+        for(int i=0;i<wordsToStrikeThrough.length;i++){
+            wordsToStrikeThrough[i] = false;
+        }
     }
 
     public void removeUnaddedWords(ArrayList<String> wordsToRemove){
         for(String w: wordsToRemove){
             words.remove(w);
         }
+    }
+    public boolean isAWord(String word){
+       String wordRev = (new StringBuilder(word).reverse().toString());
+        boolean isInTheGrid = (words.contains(word) || words.contains(wordRev));
+
+        if(isInTheGrid){
+           wordsToStrikeThrough[words.indexOf(word)] = true;
+        }
+
+
+        return isInTheGrid;
+
+
     }
 
     public void paintComponent(Graphics g){
@@ -37,31 +56,25 @@ public class WordPane extends JPanel {
 
         //Draw Word List
         g.setFont(new Font("Mono", Font.PLAIN, 12));
-        if(words.size()>0){
-            Collections.sort((words));
-            g.setColor(Color.BLACK);
-
-            int wordsPerColumn = (int)words.size() / 5;
-            for(int i=0;i< wordsPerColumn;i++){
-                g.drawString(words.get(i),10, 50+(12*i));
+        int wordsPerColumn = 6;
+        int xOffset = 50;
+        int yOffset = 50;
+        for(int i=0;i<words.size();i++){
+            if(wordsToStrikeThrough[i]){
+                g.setColor(Color.RED);
+            }else{
+                g.setColor(Color.BLACK);
             }
+            yOffset = yOffset+(15);
+            g.drawString(words.get(i), xOffset, yOffset);
 
-            for(int i=wordsPerColumn;i< wordsPerColumn*2;i++){
-                g.drawString(words.get(i),150, 50+(12*(i-wordsPerColumn)));
-            }
 
-            for(int i=wordsPerColumn*2;i< wordsPerColumn*3;i++){
-                g.drawString(words.get(i),300, 50+(12*(i-wordsPerColumn*2)));
-            }
-
-            for(int i=wordsPerColumn*3;i< wordsPerColumn*4;i++){
-                g.drawString(words.get(i),450, 50+(12*(i-wordsPerColumn*3)));
-            }
-
-            for(int i=wordsPerColumn*4;i< words.size();i++){
-                g.drawString(words.get(i),600, 50+(12*(i-wordsPerColumn*4)));
+            if(i%wordsPerColumn==0){
+                xOffset+=150;
+                yOffset = 50;
             }
         }
+        repaint();
     }
 
     public ArrayList<String> getWords(){
