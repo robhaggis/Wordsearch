@@ -75,7 +75,7 @@ public class Wordsearch {
         frame.add(words, c);
 
         //Generate Button
-        JButton generateButton = new JButton("Generate Puzzle");
+        JButton generateButton = new JButton("Generate new wordsearch");
         generateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -91,7 +91,7 @@ public class Wordsearch {
         frame.add(generateButton, c);
 
         //Reset Button
-        JButton resetButton = new JButton("Reset Puzzle");
+        JButton resetButton = new JButton("Reset this Wordsearch");
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,17 +105,15 @@ public class Wordsearch {
         c.weightx = 1.0;
         c.weighty = 0.0;
         frame.add(resetButton, c);
-
         frame.repaint();
     }
 
     public static void generateButtonPressed(){
+        //wordSearchPanelcycleLetters(100);
         wordSearchPanel.loadNewPuzzle();
-
     }
 
     public static void resetButtonPressed(){
         wordSearchPanel.resetGrid();
-
     }
 }

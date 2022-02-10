@@ -1,7 +1,7 @@
+Cocktails
 tequilasunrise
 ladybug
 darkandstormy
-french75
 pimmscup
 sazerac
 mimosa
@@ -27,7 +27,7 @@ vodkamartini
 pinacolada
 daiquiri
 rumandcoke
-ginandtonic,
+ginandtonic
 whiskeysour
 whiterussian
 negroni

@@ -4,9 +4,11 @@ import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class WordSearchPanel extends JPanel{
 
+    //TODO Set Grid size based on longest word in list
     final int GRIDX = 25;
     final int GRIDY = 25;
     int panelWidth = -1;
@@ -45,14 +47,17 @@ public class WordSearchPanel extends JPanel{
             addWordListToGrid(wordsToReAdd);
             attempts++;
         }
-        System.out.println("Failed to Add:");
-        System.out.println(failedToAddWords);
-        //TODO Remove failed to add words from displayed list
-        //fillEmptyGridSpacesWithRandomLetters();
+        if(failedToAddWords.size() >0){
+            //TODO Remove failed to add words from words to find
+            System.out.println("Failed to Add:");
+            System.out.println(failedToAddWords);
+            wordPane.removeUnaddedWords(failedToAddWords);
+        }
+        fillEmptyGridSpacesWithRandomLetters();
     }
 
     public void paintComponent(Graphics g){
-            //TODO Center letters in cells
+        //TODO Center letters in cells properly
         super.paintComponent(g);
         if(panelWidth==-1 || panelHeight==-1){
             panelWidth = super.getWidth();
@@ -83,9 +88,10 @@ public class WordSearchPanel extends JPanel{
 
                 //Draw Letters
                 g.setColor(Color.black);
-                g.setFont(new Font("Mono", Font.PLAIN, cellWidth-4));
-                int xOffset = cellX + 4;
-                int yOffset = cellY - 4 + cellHeight;
+                int fontSize = cellWidth-8;
+                g.setFont(new Font(Font.MONOSPACED, Font.BOLD, fontSize));
+                int xOffset = cellX +8;
+                int yOffset = cellY -4 + cellHeight;
                 g.drawString(letterGrid[y][x], xOffset, yOffset);
             }
         }
@@ -110,6 +116,7 @@ public class WordSearchPanel extends JPanel{
             guessEndY = cellClickedY;
             if(checkForValidMove()){
                 String wordPicked = new String();
+                resetSelections();
             }
             else
             {
@@ -117,7 +124,6 @@ public class WordSearchPanel extends JPanel{
                 resetSelections();
             }
         }
-
         repaint();
     }
 
@@ -329,11 +335,16 @@ public class WordSearchPanel extends JPanel{
         }
     }
 
+    public void cycleLetters(int reps){
+        for(int i=0; i<reps;i++){
+            resetGrid();
+            fillEmptyGridSpacesWithRandomLetters();
+            //TimeUnit.MILLISECONDS.sleep(10);
+        }
+    }
     public void loadNewPuzzle(){
         wordPane.loadNewPuzzle();
         resetGrid();
-        System.out.println("Reset Called");
-
     }
 
     private String[][] copyGrid(){
