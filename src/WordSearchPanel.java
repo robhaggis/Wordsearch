@@ -1,16 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class WordSearchPanel extends JPanel{
 
     //TODO Set Grid size based on longest word in list
-    final int GRIDX = 25;
-    final int GRIDY = 25;
+    final int GRIDX = 6;
+    final int GRIDY = 6;
     int panelWidth = -1;
     int panelHeight = -1;
 
@@ -27,7 +24,7 @@ public class WordSearchPanel extends JPanel{
     boolean[][] isCurrentlySelected = new boolean[GRIDY][GRIDX];
     boolean startSelected = false;
     boolean endSelected = false;
-    int guessStartX, guessStartY, guessEndX, guessEndY;
+    int sX, sY, eX, eY;
 
     Random rng = new Random();
 
@@ -98,6 +95,8 @@ public class WordSearchPanel extends JPanel{
     }
 
     public void processClick(int x, int y){
+
+        //Only check for clicks once panel is initialised
         if(panelWidth != -1 && panelHeight != -1){
             cellClickedX = x / (panelWidth / GRIDX);
             cellClickedY = y / (panelHeight / GRIDY);
@@ -106,16 +105,23 @@ public class WordSearchPanel extends JPanel{
         if(!startSelected){
             isCurrentlySelected[cellClickedY][cellClickedX] = true;
             startSelected = true;
-            guessStartX = cellClickedX;
-            guessStartY = cellClickedY;
+            sX = cellClickedX;
+            sY = cellClickedY;
         }
         else if (startSelected && !endSelected){
             isCurrentlySelected[cellClickedY][cellClickedX] = true;
             endSelected = true;
-            guessEndX = cellClickedX;
-            guessEndY = cellClickedY;
+            eX = cellClickedX;
+            eY = cellClickedY;
             if(checkForValidMove()){
-                String wordPicked = new String();
+                String wordPicked = getStringFromGrid(sX,sY,eX,eY);
+                if(wordPane.getWords().contains(wordPicked) || wordPane.getWords().contains(new StringBuilder(wordPicked).reverse().toString())){
+                    System.out.println("Match");
+                }
+                else
+                {
+                    System.out.println("No Match");
+                }
                 resetSelections();
             }
             else
@@ -127,9 +133,42 @@ public class WordSearchPanel extends JPanel{
         repaint();
     }
 
+    private String getStringFromGrid(int x1,int y1, int x2,int y2){
+
+        String w = new String();
+
+        if(x1 > x2) {
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        if(y1 > y2) {
+            int temp = y1;
+            y1 = y2;
+            y2 =temp;
+        }
+
+        //Horizontal Words
+        if (y1==y2){
+            for(int x = x1;x<=x2;x++){
+                w = w.concat(letterGrid[y1][x]);
+            }
+        }
+        //Vertical Words
+        if (x1==x2){
+            for(int y = y1;y<=y2;y++){
+                w = w.concat(letterGrid[y][x1]);
+            }
+        }
+
+        //System.out.println("Word is " + w);
+        return w;
+    }
+
+
     public boolean checkForValidMove(){
         //Horizontal and Vertical
-        return (guessStartY == guessEndY || guessStartX == guessEndX);
+        return (sY == eY || sX == eX);
     }
 
     public void resetSelections(){
@@ -190,7 +229,7 @@ public class WordSearchPanel extends JPanel{
         int len = word.length();
         if (!(len > GRIDX) || !(len > GRIDY))
         {
-            int dir = rng.nextInt(8);
+            int dir = rng.nextInt(4);
             String[][] copyOfGrid = copyGrid();
 
             //TODO Abstract repeated code in switch statements to its own function
@@ -335,13 +374,6 @@ public class WordSearchPanel extends JPanel{
         }
     }
 
-    public void cycleLetters(int reps){
-        for(int i=0; i<reps;i++){
-            resetGrid();
-            fillEmptyGridSpacesWithRandomLetters();
-            //TimeUnit.MILLISECONDS.sleep(10);
-        }
-    }
     public void loadNewPuzzle(){
         wordPane.loadNewPuzzle();
         resetGrid();

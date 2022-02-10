@@ -17,8 +17,9 @@ public class WordPane extends JPanel {
         repaint();
         Random r = new Random();
         String randomFile = puzzles[r.nextInt(puzzles.length)];
-        String file = "src/"+randomFile+".txt";
-        loadFileToWordList(file, 20);
+        //String file = "src/wordlists/"+randomFile+".txt";
+        String file = "src/wordlists/fourletters.txt";
+        loadFileToWordList(file, 2);
     }
 
     public void removeUnaddedWords(ArrayList<String> wordsToRemove){

@@ -109,7 +109,6 @@ public class Wordsearch {
     }
 
     public static void generateButtonPressed(){
-        //wordSearchPanelcycleLetters(100);
         wordSearchPanel.loadNewPuzzle();
     }
 
