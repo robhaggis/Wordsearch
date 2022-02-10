@@ -5,23 +5,21 @@ import java.util.Random;
 
 public class WordSearchPanel extends JPanel{
 
-    final int GRIDX = 20;
-    final int GRIDY = 20;
+    final int GRIDX = 35;
+    final int GRIDY = 35;
     int panelWidth = -1;
     int panelHeight = -1;
 
-    int cellClickedX = -1;
-    int cellClickedY = -1;
-    int cellMouseOverX = -1;
-    int cellMouseOverY = -1;
+    int cellClickedX = 0;
+    int cellClickedY = 0;
+    int cellMouseOverX = 0;
+    int cellMouseOverY = 0;
 
     WordPane wordPane;
 
     String[][] letterGrid = new String[GRIDY][GRIDX];
     ArrayList<String> masterWordList;
     ArrayList<String> failedToAddWords = new ArrayList<String>();
-    ArrayList<String> successfullyAddedWords = new ArrayList<String>();
-    ArrayList<String> wordsToFind = new ArrayList<String>();
 
     boolean[][] isCurrentlySelected = new boolean[GRIDY][GRIDX];
     boolean startSelected = false;
@@ -40,7 +38,7 @@ public class WordSearchPanel extends JPanel{
         resetGrid();
         addWordListToGrid(masterWordList);
         int attempts = 0;
-        while(failedToAddWords.size() > 0 && attempts<100){
+        while(failedToAddWords.size() > 0 && attempts<10000){
             ArrayList<String> wordsToReAdd = new ArrayList<String>();
             for(String w : failedToAddWords){
                 wordsToReAdd.add(w);
@@ -48,17 +46,9 @@ public class WordSearchPanel extends JPanel{
             addWordListToGrid(wordsToReAdd);
             attempts++;
         }
-        attempts = 0;
-
-
-        wordsToFind = successfullyAddedWords;
-        wordPane.setWordsToFind(wordsToFind);
-
-
-        //fillGridSpacesWithRandomLetters();
+        //fillEmptyGridSpacesWithRandomLetters();
     }
 
-    //Called on every mouse click
     public void paintComponent(Graphics g){
 
         super.paintComponent(g);
@@ -79,9 +69,6 @@ public class WordSearchPanel extends JPanel{
                 if(isCurrentlySelected[y][x]){
                     g.setColor(new Color(0x8800ddbb, true));
                 }
-
-                //draw Cell bounds
-
                 int cellX = x*cellWidth;
                 int cellY = y*cellHeight;
                 g.fillRect(cellX, cellY, cellWidth, cellHeight);
@@ -177,7 +164,7 @@ public class WordSearchPanel extends JPanel{
                 failedToAddWords.add(word);
             }
             else{
-                successfullyAddedWords.add(word);
+                //successfullyAddedWords.add(word);
             }
         }
         return failedToAddWords;
@@ -185,12 +172,16 @@ public class WordSearchPanel extends JPanel{
 
 
     private boolean addWordToGrid(String word) {
+
+        //TODO encourage more crossover words by biasing the wordX and wordY to
+        //favour letters already on the grid
         int len = word.length();
         if (!(len > GRIDX) || !(len > GRIDY))
         {
             int dir = rng.nextInt(4);
             String[][] copyOfGrid = copyGrid();
 
+            //TODO Diagonal Letter support
             int wordX = 0;
             int wordY = 0;
             int lettersAdded = 0;
@@ -261,7 +252,7 @@ public class WordSearchPanel extends JPanel{
         }
     }
 
-    private void fillGridSpacesWithRandomLetters() {
+    private void fillEmptyGridSpacesWithRandomLetters() {
 
         for (int y = 0; y < GRIDY; y++) {
             for (int x = 0; x < GRIDX; x++) {

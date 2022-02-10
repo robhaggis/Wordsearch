@@ -10,8 +10,12 @@ import static javax.swing.BorderFactory.createLineBorder;
 
 public class Wordsearch {
 
-    static final int WINDOWWIDTH = 500;
-    static final int WINDOWHEIGHT = 800;
+    static final int WINDOWWIDTH = 1000;
+    static final int WINDOWHEIGHT = 1000;
+
+
+    static WordPane words;
+    static WordSearchPanel wordSearchPanel;
 
     public static void main(String[] args){
 
@@ -30,6 +34,16 @@ public class Wordsearch {
         frame.setResizable(false);
         populateWindow(frame);
         frame.setVisible(true);
+
+
+
+//        //Game Loop
+//        while(true){
+//            wordSearchPanel.revalidate();
+//            words.revalidate();
+//            wordSearchPanel.repaint();
+//            words.repaint();
+//        }
     }
 
     private static void populateWindow(JFrame frame){
@@ -42,8 +56,8 @@ public class Wordsearch {
         c.insets = new Insets(0,0,0,0);
 
         //Wordsearch Grid
-        WordPane words = new WordPane();
-        WordSearchPanel wordSearchPanel = new WordSearchPanel(words);
+        words = new WordPane();
+        wordSearchPanel = new WordSearchPanel(words);
         wordSearchPanel.addMouseListener(new Mouse(wordSearchPanel));
         wordSearchPanel.addMouseMotionListener(new MouseMotion(wordSearchPanel));
         wordSearchPanel.setBorder(new LineBorder(Color.BLACK, 1));
@@ -54,16 +68,13 @@ public class Wordsearch {
         frame.add(wordSearchPanel, c);
 
         //Word Pane
-
         words.setBorder(new LineBorder(Color.BLACK, 1));
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 2;
         c.gridheight = 1;
-        c.weighty = 0.4;
+        c.weighty = 0.2;
         frame.add(words, c);
-
-
 
         //Generate Button
         JButton generateButton = new JButton("Generate Puzzle");
@@ -85,6 +96,6 @@ public class Wordsearch {
         c.weighty = 0.0;
         frame.add(resetButton, c);
 
-
+        frame.repaint();
     }
 }
