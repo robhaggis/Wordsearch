@@ -6,8 +6,8 @@ import java.util.Random;
 public class WordSearchPanel extends JPanel{
 
     //TODO Set Grid size based on longest word in list
-    final int GRIDX = 6;
-    final int GRIDY = 6;
+    final int GRIDX = 20;
+    final int GRIDY = 20;
     int panelWidth = -1;
     int panelHeight = -1;
 
@@ -22,6 +22,7 @@ public class WordSearchPanel extends JPanel{
     ArrayList<String> failedToAddWords = new ArrayList<String>();
 
     boolean[][] isCurrentlySelected = new boolean[GRIDY][GRIDX];
+    boolean[][] isFoundCell = new boolean[GRIDY][GRIDX];
     boolean startSelected = false;
     boolean endSelected = false;
     int sX, sY, eX, eY;
@@ -72,9 +73,15 @@ public class WordSearchPanel extends JPanel{
                     g.setColor(new Color(0x8800bb55, true));
                 }
 
-                if(isCurrentlySelected[y][x]){
+                if(isFoundCell[y][x]){
                     g.setColor(new Color(0x8800ddbb, true));
                 }
+
+                if(isCurrentlySelected[y][x]){
+                    g.setColor(new Color(0x88dd0000, true));
+                }
+
+
                 int cellX = x*cellWidth;
                 int cellY = y*cellHeight;
                 g.fillRect(cellX, cellY, cellWidth, cellHeight);
@@ -108,67 +115,118 @@ public class WordSearchPanel extends JPanel{
             sX = cellClickedX;
             sY = cellClickedY;
         }
-        else if (startSelected && !endSelected){
+        else if (startSelected && !endSelected) {
             isCurrentlySelected[cellClickedY][cellClickedX] = true;
             endSelected = true;
             eX = cellClickedX;
             eY = cellClickedY;
-            if(checkForValidMove()){
-                String wordPicked = getStringFromGrid(sX,sY,eX,eY);
-                if(wordPane.getWords().contains(wordPicked) || wordPane.getWords().contains(new StringBuilder(wordPicked).reverse().toString())){
-                    System.out.println("Match");
-                }
-                else
-                {
+
+            String wordPicked = getStringFromGrid(sX, sY, eX, eY);
+            if (wordPicked != "") {
+                if (wordPane.isAWord(wordPicked)){
+                    //TODO MATCH
+                    highlightWord(sX, sY, eX, eY);
+                } else {
+                    //NO MATCH or Invalid Move
                     System.out.println("No Match");
                 }
-                resetSelections();
             }
-            else
-            {
-                System.out.println("Invalid move");
-                resetSelections();
-            }
+            resetSelections();
         }
         repaint();
     }
 
+    public void highlightWord(int x1, int y1, int x2, int y2){
+
+        System.out.println("Highlighting");
+
+        //Horizontal
+        if(y1==y2){
+            if (x2 < x1) {
+                int temp = x1;
+                x1 = x2;
+                x2 = temp;
+            }
+            for(int x=x1;x<=x2;x++){
+                isFoundCell[y1][x] = true;
+            }
+        }
+
+        //Vertical
+        if(x1==x2){
+            if (y2 < y1) {
+                int temp = y1;
+                y1 = y2;
+                y2 = temp;
+            }
+            for(int y=y1;y<=y2;y++){
+                isFoundCell[y][x1] = true;
+            }
+        }
+    }
+
+    //TODO Ewww so many ifs
     private String getStringFromGrid(int x1,int y1, int x2,int y2){
-
         String w = new String();
-
-        if(x1 > x2) {
-            int temp = x1;
-            x1 = x2;
-            x2 = temp;
-        }
-        if(y1 > y2) {
-            int temp = y1;
-            y1 = y2;
-            y2 =temp;
-        }
-
-        //Horizontal Words
-        if (y1==y2){
+        //L->R
+        if (y1==y2 && x2 > x1){
             for(int x = x1;x<=x2;x++){
                 w = w.concat(letterGrid[y1][x]);
             }
         }
-        //Vertical Words
-        if (x1==x2){
+        //R->L
+        else if (y1==y2 && x1 > x2){
+            for(int x = x1;x>=x2;x--){
+                w = w.concat(letterGrid[y1][x]);
+            }
+        }
+        //T->B
+        else if (x1==x2 && y2 > y1){
             for(int y = y1;y<=y2;y++){
                 w = w.concat(letterGrid[y][x1]);
             }
         }
+        //B->T
+        else if (x1==x2 && y1 > y2){
+            for(int y = y1;y>=y2;y--){
+                w = w.concat(letterGrid[y][x1]);
+            }
+        }
+        //TL->BR
+        else if (((x2-x1) == (y2-y1)) && (x2 > x1 && y2 > y1)){
+            int xOffs = 0;
+            for(int y = y1;y<=y2;y++){
+                w = w.concat(letterGrid[y][(x1+xOffs)]);
+                xOffs++;
+            }
+        }
 
-        //System.out.println("Word is " + w);
+        //BR->TL
+        else if (((x2-x1) == (y2-y1)) && (x2 < x1 && y2 < y1)){
+            int xOffs = 0;
+            for(int y = y1;y>=y2;y--){
+                w = w.concat(letterGrid[y][(x1-xOffs)]);
+                xOffs++;
+            }
+        }
+
+        //BL->TR
+        else if (((x2-x1) == (y1-y2)) && (x1 < x2 && y2 < y1)){
+            int yOffs = 0;
+            for(int x = x1;x<=x2;x++){
+                w = w.concat(letterGrid[y1-yOffs][x]);
+                yOffs++;
+            }
+        }
+        //TR-BL
+        else if (((x2-x1) == (y1-y2)) && (x1 > x2 && y2 > y1)){
+            int yOffs = 0;
+            for(int x = x1;x>=x2;x--){
+                w = w.concat(letterGrid[y1+yOffs][x]);
+                yOffs++;
+            }
+        }
         return w;
-    }
-
-
-    public boolean checkForValidMove(){
-        //Horizontal and Vertical
-        return (sY == eY || sX == eX);
     }
 
     public void resetSelections(){
@@ -187,6 +245,7 @@ public class WordSearchPanel extends JPanel{
             for (int x = 0; x < GRIDX; x++) {
                 letterGrid[y][x] = "";
                 isCurrentlySelected[y][x] = false;
+                isFoundCell[y][x] = false;
             }
         }
         startSelected = false;
