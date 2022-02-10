@@ -5,8 +5,8 @@ import java.util.Random;
 
 public class WordSearchPanel extends JPanel{
 
-    final int GRIDX = 35;
-    final int GRIDY = 35;
+    final int GRIDX = 15;
+    final int GRIDY = 15;
     int panelWidth = -1;
     int panelHeight = -1;
 
@@ -38,7 +38,8 @@ public class WordSearchPanel extends JPanel{
         resetGrid();
         addWordListToGrid(masterWordList);
         int attempts = 0;
-        while(failedToAddWords.size() > 0 && attempts<10000){
+        while(failedToAddWords.size() > 0 && attempts<1000){
+            //TODO Weird crash here when trying to add too many words IOOB error
             ArrayList<String> wordsToReAdd = new ArrayList<String>();
             for(String w : failedToAddWords){
                 wordsToReAdd.add(w);
@@ -46,7 +47,7 @@ public class WordSearchPanel extends JPanel{
             addWordListToGrid(wordsToReAdd);
             attempts++;
         }
-        //fillEmptyGridSpacesWithRandomLetters();
+        fillEmptyGridSpacesWithRandomLetters();
     }
 
     public void paintComponent(Graphics g){

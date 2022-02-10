@@ -11,7 +11,7 @@ public class WordPane extends JPanel {
     ArrayList<String> words = new ArrayList<String>();
 
     public WordPane(){
-        loadFileToWordList("src/fruit.txt", 20);
+        loadFileToWordList("src/fruit.txt", 5);
         this.revalidate();
     }
 
@@ -19,10 +19,9 @@ public class WordPane extends JPanel {
         super.paintComponent(g);
         //TODO Dynamic Columns based on num words in list
         if(words.size()>0){
+            Collections.sort((words));
             g.setColor(Color.BLACK);
-            int numColumns = (int)words.size() / 10;
-            int wordsPerColumn = (int)words.size() / numColumns;
-
+            int wordsPerColumn = (int)words.size() / 3;
             for(int i=0;i< wordsPerColumn;i++){
                 g.drawString(words.get(i),10, 12+(12*i));
                 System.out.println(words.get(i));
@@ -45,6 +44,7 @@ public class WordPane extends JPanel {
     }
 
     public void loadFileToWordList(String filepath, int num){
+        //TODO Discard Words based on grid size
         ArrayList<String> complete = new ArrayList<String>();
         File file = new File(filepath);
         try {
