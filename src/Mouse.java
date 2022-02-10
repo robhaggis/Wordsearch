@@ -11,7 +11,7 @@ public class Mouse implements MouseListener{
     }
     @Override
     public void mouseClicked(MouseEvent e) {
-        wordSearchPanel.processClick(e.getX(), e.getY());
+
     }
 
     @Override
@@ -21,7 +21,7 @@ public class Mouse implements MouseListener{
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        wordSearchPanel.processClick(e.getX(), e.getY());
     }
 
     @Override
