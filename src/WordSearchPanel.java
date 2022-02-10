@@ -1,8 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class WordSearchPanel extends JPanel{
@@ -17,22 +15,47 @@ public class WordSearchPanel extends JPanel{
     int cellMouseOverX = -1;
     int cellMouseOverY = -1;
 
+    WordPane wordPane;
+
     String[][] letterGrid = new String[GRIDY][GRIDX];
+    ArrayList<String> masterWordList;
+    ArrayList<String> failedToAddWords = new ArrayList<String>();
+    ArrayList<String> successfullyAddedWords = new ArrayList<String>();
+    ArrayList<String> wordsToFind = new ArrayList<String>();
 
     boolean[][] isCurrentlySelected = new boolean[GRIDY][GRIDX];
     boolean startSelected = false;
     boolean endSelected = false;
-
     int guessStartX, guessStartY, guessEndX, guessEndY;
 
-    public WordSearchPanel(){
-        fillGridSpacesWithRandomLetters();
+    Random rng = new Random();
 
-        for(int y = 0; y< GRIDY; y++) {
-            for (int x = 0; x < GRIDX; x++) {
-                isCurrentlySelected[y][x] = false;
+    public WordSearchPanel(WordPane panelWords){
+        this.wordPane = panelWords;
+        masterWordList = panelWords.getWords();
+        initGrid();
+    }
+
+    private void initGrid(){
+        resetGrid();
+        addWordListToGrid(masterWordList);
+        int attempts = 0;
+        while(failedToAddWords.size() > 0 && attempts<100){
+            ArrayList<String> wordsToReAdd = new ArrayList<String>();
+            for(String w : failedToAddWords){
+                wordsToReAdd.add(w);
             }
+            addWordListToGrid(wordsToReAdd);
+            attempts++;
         }
+        attempts = 0;
+
+
+        wordsToFind = successfullyAddedWords;
+        wordPane.setWordsToFind(wordsToFind);
+
+
+        //fillGridSpacesWithRandomLetters();
     }
 
     //Called on every mouse click
@@ -50,16 +73,22 @@ public class WordSearchPanel extends JPanel{
                 //Draw Cells
                 g.setColor(Color.white);
                 if(cellMouseOverX ==x & cellMouseOverY == y){
-                    g.setColor(new Color(0x88ff0000, true));
+                    g.setColor(new Color(0x8800bb55, true));
                 }
 
                 if(isCurrentlySelected[y][x]){
-                    g.setColor(Color.cyan);
+                    g.setColor(new Color(0x8800ddbb, true));
                 }
+
+                //draw Cell bounds
 
                 int cellX = x*cellWidth;
                 int cellY = y*cellHeight;
                 g.fillRect(cellX, cellY, cellWidth, cellHeight);
+
+                //draw Cell bounds
+                g.setColor(Color.lightGray);
+                g.drawRect(cellX, cellY, cellWidth, cellHeight);
 
                 //Draw Letters
                 g.setColor(Color.black);
@@ -116,6 +145,17 @@ public class WordSearchPanel extends JPanel{
         endSelected = false;
     }
 
+    public void resetGrid(){
+        repaint();
+        for(int y=0;y<GRIDY;y++){
+            for(int x=0;x<GRIDX;x++){
+                letterGrid[y][x] = "";
+                isCurrentlySelected[y][x] = false;
+            }
+        }
+        startSelected = false;
+        endSelected = false;
+    }
     private void checkForWordMatch(){
         System.out.println("No Match");
         resetSelections();
@@ -130,20 +170,119 @@ public class WordSearchPanel extends JPanel{
         repaint();
     }
 
-    private void fillGridSpacesWithRandomLetters(){
-        Random rng = new Random();
+    private ArrayList<String> addWordListToGrid(ArrayList<String> wordList) {
+        failedToAddWords.clear();
+        for (String word : wordList) {
+            if (!(addWordToGrid(word))) {
+                failedToAddWords.add(word);
+            }
+            else{
+                successfullyAddedWords.add(word);
+            }
+        }
+        return failedToAddWords;
+    }
 
-        letterGrid[0][0] =  "A";
-        letterGrid[GRIDX-1][GRIDY-1] =  "Z";
-        for(int y = 0; y< GRIDY; y++) {
+
+    private boolean addWordToGrid(String word) {
+        int len = word.length();
+        if (!(len > GRIDX) || !(len > GRIDY))
+        {
+            int dir = rng.nextInt(4);
+            String[][] copyOfGrid = copyGrid();
+
+            int wordX = 0;
+            int wordY = 0;
+            int lettersAdded = 0;
+            switch(dir) {
+                case 0:
+                    wordX = rng.nextInt(0, GRIDX - len);
+                    wordY = rng.nextInt(0, GRIDY);
+                    lettersAdded = 0;
+                    for (int i = 0; i < len; i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX + i, wordY, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+                case 1:
+                    wordX = rng.nextInt(0, GRIDX);
+                    wordY = rng.nextInt(0, GRIDY-len);
+                    lettersAdded = 0;
+                    for (int i = 0; i < len; i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX, wordY+i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+
+                case 2:
+                    wordX = rng.nextInt(GRIDX-len, GRIDX);
+                    wordY = rng.nextInt(0, GRIDY);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX-i, wordY, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+
+                case 3:
+                    wordX = rng.nextInt(0, GRIDX);
+                    wordY = rng.nextInt(GRIDY-len, GRIDY);
+                    lettersAdded = 0;
+                    for (int i = 0; i <len;  i++) {
+                        String letterToAdd = word.substring(i, i + 1);
+                        if (addLetterToCell(wordX, wordY-i, letterToAdd, copyOfGrid)) {
+                            lettersAdded++;
+                        }
+                    }
+                    break;
+                }
+
+
+            if (lettersAdded == len) {
+                letterGrid = copyOfGrid;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean addLetterToCell(int x, int y, String letter, String[][] grid){
+        if(grid[y][x].equals("") || grid[y][x].equals(letter)){
+            grid[y][x] = letter;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private void fillGridSpacesWithRandomLetters() {
+
+        for (int y = 0; y < GRIDY; y++) {
             for (int x = 0; x < GRIDX; x++) {
-                char c = (char)(rng.nextInt(26)+ 'A');
+                char c = (char) (rng.nextInt(26) + 'A');
 
-                if(letterGrid[y][x] == null){
+                if (letterGrid[y][x] == "") {
                     letterGrid[y][x] = Character.toString(c);
                 }
 
             }
         }
+    }
+
+    private String[][] copyGrid(){
+        String [][] newGrid = new String[GRIDY][GRIDX];
+
+        for(int y=0;y<GRIDY;y++){
+            for(int x=0;x<GRIDX;x++){
+                newGrid[y][x] = letterGrid[y][x];
+            }
+        }
+        return newGrid;
     }
 }

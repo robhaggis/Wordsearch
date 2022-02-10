@@ -42,7 +42,8 @@ public class Wordsearch {
         c.insets = new Insets(0,0,0,0);
 
         //Wordsearch Grid
-        WordSearchPanel wordSearchPanel = new WordSearchPanel();
+        WordPane words = new WordPane();
+        WordSearchPanel wordSearchPanel = new WordSearchPanel(words);
         wordSearchPanel.addMouseListener(new Mouse(wordSearchPanel));
         wordSearchPanel.addMouseMotionListener(new MouseMotion(wordSearchPanel));
         wordSearchPanel.setBorder(new LineBorder(Color.BLACK, 1));
@@ -53,14 +54,16 @@ public class Wordsearch {
         frame.add(wordSearchPanel, c);
 
         //Word Pane
-        JPanel wordList = new JPanel();
-        wordList.setBorder(new LineBorder(Color.BLACK, 1));
+
+        words.setBorder(new LineBorder(Color.BLACK, 1));
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 2;
         c.gridheight = 1;
         c.weighty = 0.4;
-        frame.add(wordList, c);
+        frame.add(words, c);
+
+
 
         //Generate Button
         JButton generateButton = new JButton("Generate Puzzle");
